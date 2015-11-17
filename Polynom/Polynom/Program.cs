@@ -7,10 +7,10 @@ namespace Polynom
 {
     class Monomial
     {
-        private int _value;
+        private double _value;
         private int _degree;
 
-        public Monomial(int value, int degree)
+        public Monomial(double value, int degree)
         {
             this._value = value;
             if (degree >= 0)
@@ -19,7 +19,7 @@ namespace Polynom
                 this._degree = 0;
         }
 
-        public int Value
+        public double Value
         {
             get
             {
@@ -38,23 +38,30 @@ namespace Polynom
 
     class Polynom
     {
-        protected const int MAX_SIZE = 200;
-        protected double[] _nodes = new double[MAX_SIZE];
+        protected double[] _nodes;
+        protected int _n;
 
-        public Polynom(double[] array)
+        public Polynom(double[] array, int n)
         {
-            int i = 0;
-            while ((i < array.Length) && (i < MAX_SIZE))
+            this._nodes = array;
+            this._n = n;
+        }
+
+        public Polynom(double[] array) : this(array, array.Length)
+        {
+        }
+
+        public Polynom() : this(new double[] {}, 0)
+        {
+        }
+
+        public int n
+        {
+            get
             {
-                this.Nodes[i] = array[i];
-                i += 1;
+                return this._n;
             }
         }
-
-        public Polynom()
-        {
-        }
-
 
         public double[] Nodes
         {
@@ -67,7 +74,7 @@ namespace Polynom
         public double Calc(double x)
         {
             double value = 0;
-            for (int i = 0; i < this.Nodes.Length; i++)
+            for (int i = 0; i < this.n; i++)
             {
                 value += this.Nodes[i] * Math.Pow(x, i);
             }
@@ -77,25 +84,25 @@ namespace Polynom
 
         public static Polynom operator +(Polynom X, Polynom Y)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[Math.Max(X.n, Y.n)];
 
-            int i = 0;
-            while ((i < X.Nodes.Length) && (i < Y.Nodes.Length))
-            {
+            for (int i = 0; i < Math.Min(X.n, Y.n); i++)
                 Z[i] = X.Nodes[i] + Y.Nodes[i];
-                i += 1;
-            }
+
+            for (int i = Math.Min(X.n, Y.n); i < Math.Max(X.n, Y.n); i++)
+                Z[i] = (X.n > Y.n) ? X.Nodes[i] : Y.Nodes[i];
+
 
             return new Polynom(Z);
+
         }
 
         public static Polynom operator +(Polynom X, Monomial Num)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[X.n];
 
-            for (int i = 0; i < X.Nodes.Length; i++)
+            for (int i = 0; i < X.n; i++)
                 Z[i] = X.Nodes[i];
-
             Z[Num.Degree] += Num.Value;
 
             return new Polynom(Z);
@@ -103,7 +110,10 @@ namespace Polynom
 
         public static Polynom operator +(Polynom X, double num)
         {
-            double[] Z = X.Nodes;
+            double[] Z = new double[X.n];
+
+            for (int i = 0; i < X.n; i++)
+                Z[i] = X.Nodes[i];
             Z[0] += num;
 
             return new Polynom(Z);
@@ -111,25 +121,24 @@ namespace Polynom
 
         public static Polynom operator -(Polynom X, Polynom Y)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[Math.Max(X.n, Y.n)];
 
-            int i = 0;
-            while ((i < X.Nodes.Length) && (i < Y.Nodes.Length))
-            {
+            for (int i = 0; i < Math.Min(X.n, Y.n); i++)
                 Z[i] = X.Nodes[i] - Y.Nodes[i];
-                i += 1;
-            }
+
+            for (int i = Math.Min(X.n, Y.n); i < Math.Max(X.n, Y.n); i++)
+                Z[i] = (X.n > Y.n) ? X.Nodes[i] : Y.Nodes[i];
+
 
             return new Polynom(Z);
         }
 
         public static Polynom operator -(Polynom X, Monomial Num)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[X.n];
 
-            for (int i = 0; i < X.Nodes.Length; i++)
+            for (int i = 0; i < X.n; i++)
                 Z[i] = X.Nodes[i];
-
             Z[Num.Degree] -= Num.Value;
 
             return new Polynom(Z);
@@ -137,20 +146,17 @@ namespace Polynom
 
         public static Polynom operator -(Polynom X, double num)
         {
-            double[] Z = X.Nodes;
-            Z[0] -= num;
-
-            return new Polynom(Z);
+            return X + (-num);
         }
 
         public static Polynom operator *(Polynom X, Polynom Y)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[2 * Math.Max(X.n, Y.n)];
 
             for (int i = 0; i < X.Nodes.Length; i++)
                 for (int j = 0; j < Y.Nodes.Length; j++)
                 {
-                    if (X.Nodes[i] != 0 && Y.Nodes[j] != 0 && (i + j) < MAX_SIZE)
+                    if (X.Nodes[i] != 0 && Y.Nodes[j] != 0)
                         Z[i + j] += X.Nodes[i] * Y.Nodes[j];
                 }
             
@@ -159,28 +165,29 @@ namespace Polynom
 
         public static Polynom operator *(Polynom X, Monomial Num)
         {
-            double[] Z = new double[MAX_SIZE];
+            double[] Z = new double[Math.Max(X.n, Num.Degree)];
 
-            if (Num.Value != 0)
-            {
-                for (int i = 0; i < X.Nodes.Length; i++)
-                {
-                    if (X.Nodes[i] != 0)
-                        Z[i + Num.Degree] = X.Nodes[i] * Num.Value;
-                }
-            }
+            for (int i = 0; i < X.n; i++)
+                Z[i] = X.Nodes[i];
+            Z[Num.Degree] *= Num.Value;
 
             return new Polynom(Z);
         }
 
         public static Polynom operator *(Polynom X, double num)
         {
-            double[] Z = X.Nodes;
-            Z[0] *= num;
+            double[] Z = new double[X.n];
+
+            for (int i = 0; i < X.n; i++)
+                Z[i] += X.Nodes[i] * num;
 
             return new Polynom(Z);
         }
 
+        public static Polynom operator /(Polynom X, double num)
+        {
+            return X * (1 / num);
+        }
 
         public void Print()
         {
@@ -194,7 +201,7 @@ namespace Polynom
 
             i += 1;
 
-            while (i < this.Nodes.Length)
+            while (i < this.n)
             {
                 if (this.Nodes[i] != 0)
                     Console.Write(" + " + Math.Round(this.Nodes[i], 2) + " * x^" + i);
@@ -203,33 +210,13 @@ namespace Polynom
 
             Console.WriteLine();
         }
-
-        //protected static double[] GetNodes(double[] arr)
-        //{
-        //    int length = arr.Length;
-
-        //    for (int i = arr.Length - 1; i >= 0; i--)
-        //    {
-        //        if (arr[i] != 0)
-        //        {
-        //            length = i + 1;
-        //            break;
-        //        }
-        //    }
-
-        //    double[] arrAnswer = new double[length];
-        //    Array.Copy(arr, 0, arrAnswer, 0, length);
-
-        //    return arrAnswer;
-        //}
     }
 
     class LagrangePolynom : Polynom
     {
         public LagrangePolynom() : base() { }
 
-        public LagrangePolynom(double[] array)
-            : base(array)
+        public LagrangePolynom(double[] array) : base(array)
         {
             Polynom x = new Polynom(new double[] { 0, 1 });
             Polynom L = new Polynom();
@@ -240,14 +227,14 @@ namespace Polynom
                 for (int j = 0; j < array.Length; j++)
                     if (j != i)
                     {
-                        li *= (x - array[j]) * (1 / (array[i] - array[j]));
+                        li *= (x - array[j]) / (array[i] - array[j]);
                     }
 
                 L += li * f(array[i]);
             }
 
-            for (int i = 0; i < L.Nodes.Length; i++)
-                this._nodes[i] = L.Nodes[i];
+            this._nodes = L.Nodes;
+            this._n = L.n;
         }
 
         private double f(double x)
@@ -260,11 +247,32 @@ namespace Polynom
     {
         static void Main(string[] args)
         {
-            double[] a1 = new double[] { -1.5, -0.75, 0, 0.75, 1.5 };
-            //double[] a2 = new double[] { 4, 14, 27 };
-            //Monomial mono = new Monomial(5, 1);
-            LagrangePolynom lp1 = new LagrangePolynom(a1);
-            //Polynom p2 = new Polynom(a2);
+            double[] a1 = new double[] { -2, 1, 4, -1 };
+            double[] a2 = new double[] { 3, 0, 27 };
+            Monomial mono = new Monomial(5, 1);
+            Polynom p1 = new Polynom(a1);
+            Polynom p2 = new Polynom(a2);
+
+            p1.Print();
+            p2.Print();
+            Console.WriteLine();
+
+            (p1 + p2).Print();
+            (p1 - p2).Print();
+            (p1 * p2).Print();
+            Console.WriteLine();
+
+            (p1 + mono).Print();
+            (p1 - mono).Print();
+            (p1 * mono).Print();
+            Console.WriteLine();
+
+            (p1 + 3).Print();
+            (p1 - 3).Print();
+            (p1 * 3).Print();
+            Console.WriteLine();
+
+            LagrangePolynom lp1 = new LagrangePolynom(new double[] {-1.5, -0.75, 0, 0.75, 1.5});
             lp1.Print();
             Console.WriteLine(lp1.Calc(2));
 
