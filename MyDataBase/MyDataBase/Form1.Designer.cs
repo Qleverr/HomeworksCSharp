@@ -33,6 +33,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -54,6 +55,7 @@
             this.Button_SaveBD.TabIndex = 1;
             this.Button_SaveBD.Text = "Сохранить";
             this.Button_SaveBD.UseVisualStyleBackColor = true;
+            this.Button_SaveBD.Click += new System.EventHandler(this.Button_SaveBD_Click);
             // 
             // tabControl1
             // 
@@ -98,6 +100,7 @@
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
     }
 }
 

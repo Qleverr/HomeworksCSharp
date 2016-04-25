@@ -24,5 +24,10 @@ namespace MyDataBase
         {
             _controller.OpenFile(this.openFileDialog1, this.tabControl1);
         }
+
+        private void Button_SaveBD_Click(object sender, EventArgs e)
+        {
+            _controller.SaveFile(this.saveFileDialog1, this.tabControl1);
+        }
     }
 }

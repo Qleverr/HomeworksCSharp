@@ -28,6 +28,8 @@ namespace MyDataBase
                     {
                         TabPage newPage = new TabPage(pageName);
                         newPage.Controls.Add(CreateGridByFile(pageName));
+                        newPage.Controls.Add(SetAddButton());
+                        newPage.Controls.Add(SetDeleteButton());
                         tabControl.TabPages.Add(newPage);
                         tabControl.Refresh();
                     }
@@ -41,7 +43,7 @@ namespace MyDataBase
 
             grid.Size = new Size(635, 240);
             grid.AllowUserToAddRows = false;
-            grid.ReadOnly = true;
+            grid.ReadOnly = false;
 
             CreateGridColumns(grid, file);
             CreateGridRows(grid, file);
@@ -53,12 +55,19 @@ namespace MyDataBase
         {
             StreamReader reader = new StreamReader(file + "/main.txt");
 
-            string columnName;
-            while ((columnName = reader.ReadLine()) != null)
+            try
             {
-                DataGridViewTextBoxColumn column = new DataGridViewTextBoxColumn();
-                column.HeaderText = columnName;
-                grid.Columns.Add(column);
+                string columnName;
+                while ((columnName = reader.ReadLine()) != null)
+                {
+                    DataGridViewTextBoxColumn column = new DataGridViewTextBoxColumn();
+                    column.HeaderText = columnName;
+                    grid.Columns.Add(column);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
             reader.Close();
         }
@@ -89,6 +98,54 @@ namespace MyDataBase
             }
 
             reader.Close();
+        }
+
+        private Button SetAddButton()
+        {
+            Button addButton = new Button();
+
+            addButton.Size = new Size(100, 25);
+            addButton.Location = new Point(130, 250);
+            addButton.Text = "Добавить";
+            addButton.Name = "AddButton";
+            addButton.Click += AddButton_Click;
+
+            return addButton;
+        }
+
+        private void AddButton_Click(object sender, EventArgs e)
+        {
+            DataGridView grid = (DataGridView)((Button)sender).Parent.Controls[0];
+            grid.Rows.Add();
+        }
+
+        private Button SetDeleteButton()
+        {
+            Button deleteButton = new Button();
+
+            deleteButton.Size = new Size(100, 25);
+            deleteButton.Location = new Point(260, 250);
+            deleteButton.Text = "Удалить";
+            deleteButton.Name = "DeleteButton";
+            deleteButton.Click += DeleteButton_Click;
+
+            return deleteButton;
+        }
+
+        private void DeleteButton_Click(object sender, EventArgs e)
+        {
+            DataGridView grid = (DataGridView)((Button)sender).Parent.Controls[0];
+            grid.Rows.Remove(grid.CurrentRow);
+        }
+
+        //private EventHandler AddButton_Click(Control control)
+        //{
+        //    int tabIndex = (int)(((Button)sender).Tag);
+        //}
+
+        public void SaveFile(SaveFileDialog saveFileDialog, TabControl tabControl)
+        {
+            
         }
     }
 }
