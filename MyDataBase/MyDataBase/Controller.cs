@@ -27,12 +27,14 @@ namespace MyDataBase
                     while ((pageName = reader.ReadLine()) != null)
                     {
                         TabPage newPage = new TabPage(pageName);
+                        newPage.Name = pageName;
                         newPage.Controls.Add(CreateGridByFile(pageName));
                         newPage.Controls.Add(SetAddButton());
                         newPage.Controls.Add(SetDeleteButton());
                         tabControl.TabPages.Add(newPage);
                         tabControl.Refresh();
                     }
+                    reader.Close();
                 }
             }
         }
@@ -84,7 +86,7 @@ namespace MyDataBase
                 num = lineInfo.Count();
                 for (int i = 0; i < num; i++)
                 {
-                    info = lineInfo[i].Split(' ');
+                    info = lineInfo[i].Split('|');
                     grid.Rows.Add(info);
                     //for (int j = 0; j < grid.ColumnCount; j++)
                     //{
@@ -138,14 +140,37 @@ namespace MyDataBase
             grid.Rows.Remove(grid.CurrentRow);
         }
 
-        //private EventHandler AddButton_Click(Control control)
-        //{
-        //    int tabIndex = (int)(((Button)sender).Tag);
-        //}
-
         public void SaveFile(SaveFileDialog saveFileDialog, TabControl tabControl)
         {
-            
+            //TabPage tabPage = tabControl.TabPages[1];
+            //DataGridView grid = (DataGridView)tabPage.Controls[0];
+            //MessageBox.Show(grid.ColumnCount.ToString());
+            try
+            {
+                foreach (TabPage tabPage in tabControl.TabPages)
+                {
+                    DataGridView grid = (DataGridView)tabPage.Controls[0];
+                    //FileInfo file = new FileInfo(String.Format(@"C:/Users/Василий/Documents/Visual Studio 2012/Projects/MyDataBase/MyDataBase/bin/Debug/{0}/data.txt", tabPage.Name.ToString()));
+                    StreamWriter myWriter = new StreamWriter(@"C:/Users/Василий/Documents/Visual Studio 2012/Projects/MyDataBase/MyDataBase/bin/Debug/" + tabPage.Name.ToString() + "/data.txt");
+                    for (int i = 0; i < grid.RowCount; i++)
+                    {
+                        for (int j = 0; j < grid.ColumnCount; j++)
+                        {
+                            myWriter.Write(grid.Rows[i].Cells[j].Value.ToString() + '|');
+                        }
+                        if (i != grid.RowCount - 1)
+                        {
+                            myWriter.WriteLine();
+                        }
+                    }
+                    myWriter.Close();
+                }
+                MessageBox.Show("База данных успешно перезаписана.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }  
         }
     }
 }
