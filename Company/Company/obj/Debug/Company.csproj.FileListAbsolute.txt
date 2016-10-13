@@ -1,0 +1,2 @@
+c:\users\василий\documents\visual studio 2012\Projects\Company\Company\bin\Debug\Company.exe.config
+F:\Программирование\Company\Company\bin\Debug\Company.exe.config
